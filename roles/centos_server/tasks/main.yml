@@ -1,0 +1,30 @@
+---
+- name: Install Docker on CentOS
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker
+
+- name: Install Docker-Compose on CentOS
+  shell: >
+    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+  args:
+    creates: /usr/local/bin/docker-compose
+
+- name: Enable Docker Socket
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Ensure docker group exists on CentOS
+  group:
+    name: docker
+    state: present
+
+- name: Add current user to Docker group on CentOS
+  user:
+    name: "{{ ansible_env.SUDO_USER }}"
+    groups: docker
+    append: yes

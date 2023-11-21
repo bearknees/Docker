@@ -1,0 +1,62 @@
+- name: Docker Container Setup
+  hosts: local
+  become: true
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Install Chrony for time synchronization
+      apt:
+        name: chrony
+        state: present
+
+    - name: Start Chrony service
+      service:
+        name: chrony
+        state: started
+
+    - name: Create a directory for Docker build context
+      file:
+        path: /home/bernice/Docker/Docker_file/build_context
+        state: directory
+
+    - name: Copy Dockerfile to the build context directory
+      copy:
+        src: /home/bernice/Docker/Docker_file/Dockerfile.txt
+        dest: /home/bernice/Docker/Docker_file/build_context/Dockerfile
+        remote_src: yes
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: web_app
+        tag: 1.0
+        build:
+          path: /home/bernice/Docker/Docker_file/build_context
+        source: build
+
+    - name: Deploy Docker container
+      community.docker.docker_container:
+        name: web_app_container
+        image: web_app:1.0
+        state: started
+        exposed_ports:
+          - "80"
+        ports:
+          - "8080:80"
+        volumes:
+          - /var/www/html:/var/www/html
+
+    - block:
+        - name: Verify if web_app_container container is running
+          command: docker ps
+          register: container_status
+
+        - debug:
+            msg: "{{ container_status.stdout }}"

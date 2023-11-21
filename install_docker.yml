@@ -1,0 +1,15 @@
+---
+- name: Install Docker on Servers
+  hosts: ubuntu_servers:centos_server
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Include CentOS role for Docker installation
+      when: "'centos_server' in group_names"
+      include_role:
+        name: centos_server
+
+    - name: Include Ubuntu role for Docker installation
+      when: "'ubuntu_servers' in group_names"
+      include_role:
+        name: ubuntu_server

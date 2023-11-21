@@ -1,0 +1,14 @@
+# Use the official Ubuntu 20.04 image
+FROM ubuntu:20.04
+
+# Update the package repository
+RUN apt-get update && apt-get install -y \
+    apache2 \
+    mariadb-server \
+    php
+
+# Expose ports
+EXPOSE 80
+
+# Start Apache and MySQL services
+CMD service apache2 start && service mysql start && tail -f /dev/null

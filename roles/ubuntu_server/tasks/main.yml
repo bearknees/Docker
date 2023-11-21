@@ -1,0 +1,20 @@
+---
+- name: Install Docker on Ubuntu
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker.io
+    - docker-compose
+
+- name: Enable Docker Socket on Ubuntu
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Add current user to Docker group on Ubuntu
+  user:
+    name: "{{ ansible_env.SUDO_USER }}"
+    groups: docker
+    append: yes
